@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.liquibase:liquibase-core:4.7.1'
+    runtimeOnly 'mysql:mysql-connector-java:8.0.27' // Añade el conector MySQL si es necesario
+}
+
+configurations {
+    liquibaseRuntime
+    compile.extendsFrom liquibaseRuntime
+}
+
+task liquibaseUpdate(type: JavaExec) {
+    main = 'liquibase.integration.commandline.Main'
+    classpath = configurations.liquibaseRuntime + sourceSets.main.output
+    args 'update'
+    args '--changeLogFile=changelog/changes/changelog.xml'
+    args "--url=jdbc:mysql://${System.getenv('DB_HOST')}/${System.getenv('DB_DATABASE')}"
+    args "--username=${System.getenv('DB_USERNAME')}"
+    args "--password=${System.getenv('DB_PASSWORD')}"
+}
